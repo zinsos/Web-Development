@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Roblox Universe ID Finder</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 40px;
+            background: #fff;
+            color: #000;
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+        p.desc {
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 6px 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+        }
+        button {
+            background: #f2f2f2;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #e6e6e6;
+        }
+        #out {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        .copy {
+            color: #1155cc;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .copy:hover {
+            text-decoration: none;
+        }
+        .small {
+            font-size: 12px;
+            color: #555;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1><b>Roblox</b> Universe ID Fetcher</h1>
+    <p class="desc">Enter a Roblox place ID and this tool will fetch its Universe ID using the public Roblox API. A barebones open-source project -> Credits to @CBrady.</p>
+    <input id="q" placeholder="Enter place ID" type="number">
+    <button id="run">Find</button>
+    <div id="out">Ready</div>
+    <div class="small">Click the Universe ID to copy</div>
+    <script>
+        function el(id) {
+            return document.getElementById(id);
+        }
+        async function run() {
+            const q = el('q').value.trim();
+            const out = el('out');
+            if (!q) {
+                out.textContent = 'Enter a place ID';
+                return;
+            }
+            out.textContent = 'Searching...';
+            try {
+                const url = 'https://corsproxy.io/?https://apis.roblox.com/universes/v1/places/' + encodeURIComponent(q) + '/universe';
+                const r = await fetch(url);
+                if (!r.ok) throw new Error('http ' + r.status);
+                const j = await r.json();
+                if (j && j.universeId) {
+                    out.innerHTML = 'Universe ID: <span class="copy">' + j.universeId + '</span>';
+                    out.querySelector('.copy').onclick = () => {
+                        navigator.clipboard.writeText(String(j.universeId));
+                        out.innerHTML = 'Copied ' + j.universeId;
+                    };
+                } else {
+                    out.textContent = 'No universeId in response';
+                }
+            } catch (e) {
+                out.textContent = 'Error: ' + e.message;
+            }
+        }
+        el('run').addEventListener('click', run);
+        el('q').addEventListener('keydown', e => {
+            if (e.key === 'Enter') run();
+        });
+    </script>
+</body>
+</html>
